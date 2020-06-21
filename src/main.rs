@@ -62,7 +62,7 @@ fn main() {
             .output().expect("Failed to execute nvidia-smi");
 
         let gpu_output_regex = Regex::new(
-            r"\| +(\d+)% +(\d+)C +.. +(\d)+W / (\d+)W \| +(\d+)MiB / +(\d+)MiB \| +0% +Default \|")
+            r"\| +(\d+)% +(\d+)C +.. +(\d)+W / (\d+)W \| +(\d+)MiB / +(\d+)MiB \| +(\d)% +Default \|")
             .unwrap();
         let output = String::from_utf8(output.stdout).unwrap();
         let output_lines = output.lines();
@@ -76,6 +76,7 @@ fn main() {
                 let max_wattage_index = 4;
                 let vram_usage_index = 5;
                 let max_vram_index = 6;
+                let gpu_utilization_index = 7;
 
                 let fan_percent = &capture[fan_percent_index].parse::<f32>().unwrap();
                 let temp = &capture[temp_index].parse::<f32>().unwrap();
@@ -83,6 +84,7 @@ fn main() {
                 let max_wattage = &capture[max_wattage_index].parse::<f32>().unwrap();
                 let vram_usage = &capture[vram_usage_index].parse::<f32>().unwrap();
                 let max_vram = &capture[max_vram_index].parse::<f32>().unwrap();
+                let gpu_utilization = &capture[gpu_utilization_index].parse::<f32>().unwrap();
 
                 let mut gpu_info = gpu_infos[gpu_index];
                 gpu_info.fan_percent.clone_from(fan_percent);
@@ -91,6 +93,7 @@ fn main() {
                 gpu_info.max_wattage.clone_from(max_wattage);
                 gpu_info.vram_usage.clone_from(vram_usage);
                 gpu_info.max_vram.clone_from(max_vram);
+                gpu_info.usage.clone_from(gpu_utilization);
                 gpu_infos[gpu_index] = gpu_info;
 
                 gpu_index += 1;
@@ -99,8 +102,8 @@ fn main() {
 
 
         for (index, gpu_info) in gpu_infos.iter().enumerate() {
-            let gpu_output = format!("GPU {} is {}C pulling {}W / {}W\n\
-            VRAM Usage {}MiB / {}MiB\nFans are at {}%", index, gpu_info.temp,
+            let gpu_output = format!("GPU {} is {}C Usage: {}%\nPulling {}W / {}W\n\
+            VRAM Usage {}MiB / {}MiB\nFans are at {}%", index, gpu_info.temp, gpu_info.usage,
                                      gpu_info.wattage, gpu_info.max_wattage,
                                      gpu_info.vram_usage, gpu_info.max_vram, gpu_info.fan_percent);
             terminal_lines.push(gpu_output.to_owned());
