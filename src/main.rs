@@ -1,6 +1,7 @@
 use sysinfo::{ComponentExt, SystemExt, ProcessorExt};
 use regex::Regex;
 use std::ops::Index;
+use std::process::Command;
 
 fn main() {
     let mut system = sysinfo::System::new_all();
@@ -44,6 +45,24 @@ fn main() {
         println!("{:?}", cpu_info)
     }
 
+    // GPU
+
+    let output = Command::new("nvidia-smi")
+        .output().expect("Failed to execute nvidia-smi");
+
+    let gpu_output_regex = Regex::new(r"| (/d+)%   (/d+)C    ..    (/d)+W / (/d+)W |    (/d+)MiB /  (/d+)MiB |      0%      Default |").unwrap();
+    let output_lines = String::from_utf8(output.stdout).unwrap().lines();
+    for line in output_lines {
+        for capture in gpu_output_regex.captures_iter(line) {
+            let fan_percent_index = 1;
+            let temp_index = 2;
+            let wattage_index = 3;
+            let max_wattage_index = 4;
+            let vram_usage_index = 5;
+            let max_vram_index = 6;
+        }
+    }
+
 
 }
 
@@ -53,7 +72,17 @@ struct CPUInfo {
     usage: f32
 }
 
+#[derive(Clone, Copy, Debug)]
+struct GPUInfo {
+    temp: f32,
+    usage: f32
+}
+
 
 fn make_cpu_info(temp: f32, usage: f32) -> CPUInfo {
     return CPUInfo {temp, usage};
+}
+
+fn make_gpu_info(temp: f32, usage: f32) -> GPUInfo {
+    return GPUInfo {temp, usage};
 }
