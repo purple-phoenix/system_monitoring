@@ -62,14 +62,15 @@ fn main() {
             .output().expect("Failed to execute nvidia-smi");
 
         let gpu_output_regex = Regex::new(
-            r"\| +(\d+)% +(\d+)C +.. +(\d)+W / (\d+)W \| +(\d+)MiB / +(\d+)MiB \| +(\d)% +Default \|")
+            r"\| *(\d+)% *(\d+)C * .. *(\d+)W */ *(\d+)W *\| *(\d+)MiB */ *(\d+)MiB.*\|.*(\d+)%.*")
             .unwrap();
         let output = String::from_utf8(output.stdout).unwrap();
         let output_lines = output.lines();
         let mut gpu_index = 0;
         for line in output_lines {
             for capture in gpu_output_regex.captures_iter(line) {
-
+                println!("{}", line);
+                println!("{:?}", capture);
                 let fan_percent_index = 1;
                 let temp_index = 2;
                 let wattage_index = 3;
@@ -99,6 +100,8 @@ fn main() {
                 gpu_index += 1;
             }
         }
+
+        println!("{:?}", gpu_infos);
 
 
         for (index, gpu_info) in gpu_infos.iter().enumerate() {
