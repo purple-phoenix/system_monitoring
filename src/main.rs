@@ -36,7 +36,7 @@ fn main() {
         let cpu_num_regex = Regex::new(r"cpu(\d+)").unwrap();
         for processor in system.get_processors() {
             let name = processor.get_name();
-            let usage = &processor.get_cpu_usage();
+            let usage = &(processor.get_cpu_usage() / 10.0);
 
             for capture in cpu_num_regex.captures_iter(name) {
                 let index_of_cpu_num = 1;
@@ -85,7 +85,7 @@ fn main() {
                 let max_vram = &capture[max_vram_index].parse::<f32>().unwrap();
 
                 let mut gpu_info = gpu_infos[gpu_index];
-                gpu_info.fan_percentgit .clone_from(fan_percent);
+                gpu_info.fan_percent.clone_from(fan_percent);
                 gpu_info.temp.clone_from(temp);
                 gpu_info.wattage.clone_from(wattage);
                 gpu_info.max_wattage.clone_from(max_wattage);
